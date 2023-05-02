@@ -1,93 +1,104 @@
 openapi: 3.0.1
 info:
-  title: TODO Plugin
-  description: A plugin that allows the user to create and manage a TODO list using ChatGPT. If you do not know the user's username, ask them first before making queries to the plugin. Otherwise, use the username "global".
+  title: GitHub Repo Info Plugin
+  description: A plugin that allows the user to fetch GitHub repository information and file contents using ChatGPT.
   version: 'v1'
 servers:
   - url: http://localhost:5003
 paths:
-  /todos/{username}:
+  /repository_info/{username}/{repo_name}:
     get:
-      operationId: getTodos
-      summary: Get the list of todos
+      operationId: getRepositoryInfo
+      summary: Get repository information
       parameters:
       - in: path
         name: username
         schema:
             type: string
         required: true
-        description: The name of the user.
+        description: The username of the repository owner.
+      - in: path
+        name: repo_name
+        schema:
+            type: string
+        required: true
+        description: The name of the Github repository.
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/getTodosResponse'
-    post:
-      operationId: addTodo
-      summary: Add a todo to the list
+                $ref: '#/components/schemas/RepositoryInfo'
+  /repository_file_contents/{repo_name}/{file_path}:
+    get:
+      operationId: getRepositoryFileContents
+      summary: Get the contents of a file in the repository
       parameters:
       - in: path
-        name: username
+        name: repo_name
         schema:
             type: string
         required: true
-        description: The name of the user.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/addTodoRequest'
-      responses:
-        "200":
-          description: OK
-    delete:
-      operationId: deleteTodo
-      summary: Delete a todo from the list
-      parameters:
+        description: The name of the Github repository (format-- user/repo).
       - in: path
-        name: username
+        name: file_path
         schema:
             type: string
         required: true
-        description: The name of the user.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/deleteTodoRequest'
+        description: The path of the file within the repository.
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileContents'
+  /generate_auth_url:
+    get:
+      operationId: generateAuthURL
+      summary: Generate a unique URL for user authentication
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth_url:
+                    type: string
+                    description: The unique URL for user authentication.
 
 components:
   schemas:
-    getTodosResponse:
+    RepositoryInfo:
       type: object
       properties:
-        todos:
-          type: array
-          items:
-            type: string
-          description: The list of todos.
-    addTodoRequest:
-      type: object
-      required:
-      - todo
-      properties:
-        todo:
+        name:
           type: string
-          description: The todo to add to the list.
-          required: true
-    deleteTodoRequest:
-      type: object
-      required:
-      - todo_idx
-      properties:
-        todo_idx:
+          description: The name of the repository.
+        owner:
+          type: string
+          description: The owner of the repository.
+        description:
+          type: string
+          description: A brief description of the repository.
+        stars:
           type: integer
-          description: The index of the todo to delete.
-          required: true
+          description: The number of stars the repository has received.
+        forks:
+          type: integer
+          description: The number of times the repository has been forked.
+    FileContents:
+      type: object
+      properties:
+        content:
+          type: string
+          description: The contents of the file in the repository.
+    AuthUrl:
+      type: object
+      properties:
+        content:
+          type: string
+          description: The Auth URL that the user needs so that we can access their github repos
