@@ -58,7 +58,7 @@ async def list_repository_directory_endpoint(username, repo_name, file_path=""):
     return quart.Response(response=json.dumps(directory_contents), status=200)
 
 @app.get("/list_repository_directory/<string:username>/<string:repo_name>")
-@app.get("/list_repository_directory/<string:username>/<string:repo_name>/<string:file_path>")
+@app.get("/list_repository_directory/<string:username>/<string:repo_name>/<path:file_path>")
 async def list_repository_directory_route(username, repo_name, file_path=""):
     return await list_repository_directory_endpoint(username, repo_name, file_path)
 
