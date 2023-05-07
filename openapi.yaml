@@ -6,6 +6,91 @@ info:
 servers:
   - url: http://localhost:5003
 paths:
+  /commit_history/{username}/{repo_name}:
+    get:
+      operationId: commitHistory
+      summary: Get the commit history of a GitHub repository
+      parameters:
+      - in: path
+        name: username
+        schema:
+            type: string
+        required: true
+        description: The username of the repository owner.
+      - in: path
+        name: repo_name
+        schema:
+            type: string
+        required: true
+        description: The name of the Github repository.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommitHistory'
+  /search_code:
+    get:
+      operationId: searchCode
+      summary: Search for code within the user's GitHub repositories
+      parameters:
+      - in: query
+        name: query
+        schema:
+            type: string
+        required: true
+        description: The search query to look for code.
+      - in: query
+        name: repo_name
+        schema:
+            type: string
+        required: false
+        description: The name of the Github repository to search within.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeSearchResults'
+  /create_issue/{username}/{repo_name}:
+    post:
+      operationId: createIssue
+      summary: Create an issue on a GitHub repository
+      parameters:
+      - in: path
+        name: username
+        schema:
+            type: string
+        required: true
+        description: The username of the repository owner.
+      - in: path
+        name: repo_name
+        schema:
+            type: string
+        required: true
+        description: The name of the Github repository.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: The title of the issue.
+                body:
+                  type: string
+                  description: The body text of the issue.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueInfo'
   /repository_info/{username}/{repo_name}:
     get:
       operationId: getRepositoryInfo
@@ -179,3 +264,66 @@ components:
         content:
           type: string
           description: The Auth URL that the user needs so that we can access their github repos
+    IssueInfo:
+      type: object
+      properties:
+        number:
+          type: integer
+          description: The issue number.
+        title:
+          type: string
+          description: The title of the issue.
+        state:
+          type: string
+          description: The state of the issue (open or closed).
+    CodeSearchResults:
+      type: object
+      properties:
+        total_count:
+          type: integer
+          description: The total number of search results.
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the file.
+              path:
+                type: string
+                description: The path of the file within the repository.
+              url:
+                type: string
+                description: The URL of the file on GitHub.
+    CommitHistory:
+      type: array
+      items:
+        type: object
+        properties:
+          sha:
+            type: string
+            description: The commit hash.
+          commit:
+            type: object
+            properties:
+              author:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The author's name.
+                  email:
+                    type: string
+                    description: The author's email.
+                  date:
+                    type: string
+                    format: date-time
+                    description: The date and time the commit was authored.
+              message:
+                type: string
+                description: The commit message.
+          url:
+            type: string
+            description: The URL of the commit on GitHub.
+
