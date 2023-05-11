@@ -13,7 +13,7 @@ load_dotenv()
 GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
 CALLBACK = "/callback"
-CALLBACK_PATH = "https://b96f-2600-1700-7c00-6df0-3c77-1c82-d8f5-b916.ngrok-free.app" + CALLBACK
+CALLBACK_PATH = os.environ.get("CALLBACK_PATH") + CALLBACK
 
 access_token_checker = AccessTokenChecker()
 
