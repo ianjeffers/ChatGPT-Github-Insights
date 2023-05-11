@@ -1,2 +1,7 @@
 quart
 quart-cors
+quart-session
+aioredis
+redis
+httpx
+python-dotenv
