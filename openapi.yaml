@@ -30,6 +30,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommitHistory'
+  /query_similar_code:
+    post:
+      operationId: querySimilarCode
+      summary: Query similar code snippets in the repository
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code_snippet:
+                  type: string
+                  description: The code snippet to find similar snippets to.
+                top_k:
+                  type: integer
+                  description: The number of similar snippets to return. If not provided, defaults to 10.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeSimilarityResults'
   /search_code:
     get:
       operationId: searchCode
@@ -326,4 +350,14 @@ components:
           url:
             type: string
             description: The URL of the commit on GitHub.
-
+    CodeSimilarityResults:
+      type: array
+      items:
+        type: object
+        properties:
+          code_id:
+            type: string
+            description: The id of the similar code snippet.
+          code_snippet:
+            type: string
+            description: The similar code snippet.

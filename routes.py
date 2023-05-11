@@ -38,7 +38,24 @@ async def repository_file_contents(username, repo_name, file_path):
         return quart.Response(response=str(e), status=401)
     github_api = GitHubAPI(access_token)
     file_info = await github_api.get_repository_file_contents(username, repo_name, file_path)
+    file_contents = file_info.get("content", "")
+
+    code_entities = []
+    if file_path.endswith('.py'):
+        code_entities += get_classes_from_py_code(file_contents)
+        code_entities += get_functions_from_py_code(file_contents)
+        
+    elif file_path.endswith('.js'):
+        code_entities += get_classes_from_js_code(file_contents)
+        code_entities += get_functions_from_js_code(file_contents)
+
+    for code, info in code_entities:
+        code_id = f"{username}/{repo_name}/{file_path}/{info['name']}"
+        code_embedding = get_code_embedding(code)
+        store_code_embeddings_in_pinecone(code_id, code_embedding)
+    
     return quart.Response(response=json.dumps(file_info), status=200)
+
 
 @routes.post("/create_issue/<string:username>/<string:repo_name>")
 async def create_issue_route(username, repo_name):
@@ -77,6 +94,22 @@ async def commit_history_route(username, repo_name):
     commit_history = await github_api.get_commit_history(full_path)
     processed_commit_data = process_commit_data(commit_history)
     return quart.Response(response=json.dumps(processed_commit_data), status=200)   
+
+@routes.post("/query_similar_code")
+async def query_similar_code():
+    try:
+        access_token = await access_token_checker.check_access_token()
+    except ValueError as e:
+        return quart.Response(response=str(e), status=401)
+    data = await request.get_json()
+    code_snippet = data.get("code_snippet")
+    top_k = data.get("top_k", 10)  # Default to returning the top 10 results
+    code_embedding = get_code_embedding(code_snippet)
+    similar_code_ids = query_code_embeddings_in_pinecone(code_embedding, top_k)
+    # You might need to implement a method to get the code snippets from the ids
+    similar_code_snippets = get_code_snippets_from_ids(similar_code_ids)
+    return quart.Response(response=json.dumps(similar_code_snippets), status=200)
+
 
 def process_commit_data(commit_data):
     simplified_commits = []
